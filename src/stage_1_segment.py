@@ -1,7 +1,6 @@
 import os
 import logging
 
-import numpy as np
 import dbdicom as db
 import miblab
 import torch
@@ -10,12 +9,11 @@ from utils import data
 
 
 
-def segment(build_path, group, site=None, batch_size=None):
+def segment(build_path, group, site=None, task='total_mr', batch_size=None):
 
     datapath = os.path.join(build_path, 'dixon', 'stage_2_data') 
     maskpath = os.path.join(build_path, 'totseg', 'stage_1_segment') 
     os.makedirs(maskpath, exist_ok=True)
-
     if site is None:
         sitedatapath = os.path.join(datapath, group)
         sitemaskpath = os.path.join(maskpath, group)
@@ -48,7 +46,7 @@ def segment(build_path, group, site=None, batch_size=None):
 
         # Skip if the masks already exist
         mask_study = [sitemaskpath, patient, (study,0)]
-        mask_series = mask_study + [(f'total_mr', 0)]
+        mask_series = mask_study + [(f'{task}', 0)]
         if mask_series in db.series(mask_study):
             continue
 
@@ -64,7 +62,7 @@ def segment(build_path, group, site=None, batch_size=None):
         # Perform segmentation
         try:
             device = 'gpu' if torch.cuda.is_available() else 'cpu'
-            label_vol = miblab.totseg(vol, cutoff=0.01, task='total_mr', device=device)
+            label_vol = miblab.totseg(vol, cutoff=0.01, task=task, device=device)
         except Exception as e:
             logging.error(f"Error processing {patient} {sequence} with total segmentator: {e}")
             continue
@@ -76,9 +74,3 @@ def segment(build_path, group, site=None, batch_size=None):
         if batch_size is not None:
             if count >= batch_size:
                 return
-
-
-
-    
-    
-    

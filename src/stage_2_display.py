@@ -1,4 +1,5 @@
 import os
+import logging
 
 import numpy as np
 from tqdm import tqdm
@@ -79,7 +80,7 @@ def WIP_movie(build_path, group, site=None,
                 plot.movie_overlay(op_arr, rois_pl, file)
 
 
-def mosaic(build_path, group, site=None, organs=None):
+def mosaic(build_path, group, site=None, organs=None, task='total_mr'):
 
     datapath = os.path.join(build_path, 'dixon', 'stage_2_data')
     maskpath = os.path.join(build_path, 'totseg', 'stage_1_segment')
@@ -97,7 +98,7 @@ def mosaic(build_path, group, site=None, organs=None):
 
     # Build output folders
     if organs is None:
-        sitedisplaypath = os.path.join(sitedisplaypath, 'mosaic_all')
+        sitedisplaypath = os.path.join(sitedisplaypath, f'mosaic_{task}')
     else:
         sitedisplaypath = os.path.join(sitedisplaypath, 'mosaic_' + '_'.join(organs))
     os.makedirs(sitedisplaypath, exist_ok=True)
@@ -107,7 +108,11 @@ def mosaic(build_path, group, site=None, organs=None):
     # Loop over the masks
     for mask in tqdm(db.series(sitemaskpath), 'Displaying masks..'):
 
-        # Get the corresponding outphase series
+        # Skip if not the right task
+        if mask[3][0] != task:
+            continue
+
+        # Get the outphase series for the mask
         patient_id = mask[1]
         study = mask[2][0]
         sequence = data.dixon_series_desc(record, patient_id, study)
@@ -127,7 +132,7 @@ def mosaic(build_path, group, site=None, organs=None):
         op_arr = db.volume(series_op).values
         mask_arr = db.volume(mask).values
         rois = {}
-        for idx, roi in class_map['total_mr'].items():
+        for idx, roi in class_map[task].items():
             rois[roi] = (mask_arr==idx).astype(np.int16)
 
         # Build mosaic

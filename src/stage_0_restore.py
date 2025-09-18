@@ -15,4 +15,16 @@ def dixons(shared_path, local_path, group, site=None):
     db.restore(sitearchivepath, sitedatapath)
 
 
+def segmentations(shared_path, local_path, group, site=None):
+    datapath = os.path.join(local_path, 'totseg', 'stage_1_segment')
+    archivepath = os.path.join(shared_path, 'totseg', 'stage_1_segment')
+    if group == 'Controls':
+        sitedatapath = os.path.join(datapath, 'Controls')
+        sitearchivepath = os.path.join(archivepath, 'Controls')
+    else:
+        sitedatapath = os.path.join(datapath, 'Patients', site)
+        sitearchivepath = os.path.join(archivepath, 'Patients', site)
+    db.restore(sitearchivepath, sitedatapath)
+
+
 

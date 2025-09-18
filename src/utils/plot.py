@@ -1,5 +1,6 @@
 import os
 import shutil
+import logging
 
 import numpy as np
 import matplotlib
@@ -94,7 +95,8 @@ def mosaic_overlay(img, rois, file, colormap='tab20', aspect_ratio=16/9, margin=
     for i in range(1, len(masks)):
         all_masks = np.logical_or(all_masks, masks[i])
     if np.sum(all_masks)==0:
-        raise ValueError('Empty masks')
+        logging.error(f'Empty masks, no plot saved to {file}')
+        return
     
     # Find corners of cropped mask
     for x0 in range(all_masks.shape[0]):
