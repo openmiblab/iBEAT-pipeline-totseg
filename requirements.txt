@@ -1,14 +1,15 @@
 tqdm
+numpy<2.0 # pyradiomics has not been ugraded to numpy 2.0
+dbdicom
+vreg
+pydmr
+totalsegmentator
+scipy
+scikit-image
+pyradiomics
 matplotlib
 imageio
 moviepy
-dbdicom
 miblab[data,dlseg]
-torch
-totalsegmentator
-numpy
-scipy
-scikit-image
-vreg
-pydmr
-pyradiomics
+pyvista
+napari[all]
