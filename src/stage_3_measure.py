@@ -26,6 +26,17 @@ def concatenate(build_path):
         dmr_file = os.path.join(measurepath, f'{group}_totseg_auto')
         pydmr.concat(dmr_files, dmr_file)
 
+        # Create some derived formats for convenience
+
+        # 1. Long format with additional columns (units, type, description)
+        long_format_file = os.path.join(measurepath, f'{group}_totseg_auto_long.csv')
+        pydmr.pars_to_long(dmr_file, long_format_file)
+
+        # 2. Wide format
+        wide_format_file = os.path.join(measurepath, f'{group}_totseg_auto_wide.csv')
+        pydmr.pars_to_wide(dmr_file, wide_format_file)
+        
+
 
 def all_organs(build_path, group, site=None):
 
@@ -47,7 +58,7 @@ def all_organs(build_path, group, site=None):
 
         patient, study, series = automask[1], automask[2][0], automask[3][0]
 
-        # If the patient results exist, skip
+        # If the results already exist, skip
         dmr_file = os.path.join(sitemeasurepath, f'{patient}_{study}_{series}')
         if os.path.exists(f'{dmr_file}.dmr.zip'):
             continue
@@ -74,6 +85,7 @@ def all_organs(build_path, group, site=None):
             except Exception as e:
                 logging.error(f"Patient {patient} {roi} - error computing ski-shapes: {e}")
             else:
+                
                 dmr['data'] = dmr['data'] | {p: v[1:] for p, v in results.items()}
                 dmr['pars'] = dmr['pars'] | {(patient, study, p): v[0] for p, v in results.items()}
 
@@ -87,6 +99,13 @@ def all_organs(build_path, group, site=None):
                 dmr['data'] = dmr['data'] | {p:v[1:] for p, v in results.items()}
                 dmr['pars'] = dmr['pars'] | {(patient, study, p): v[0] for p, v in results.items()}
 
-            # Write results to file
-            pydmr.write(dmr_file, dmr)
+
+        # Append parsed biomarkers in the dictionary for convenience
+        dmr['columns'] = ['body_part', 'biomarker_category', 'biomarker']
+        for p in dmr['data']:
+            dmr['data'][p] += p.split('-')
+
+        # Write results to file
+        pydmr.write(dmr_file, dmr)
+
 

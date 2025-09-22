@@ -16,7 +16,7 @@ def organ_mask(build_path, group, site=None, task='total_mr', organ='pancreas'):
 
     datapath = os.path.join(build_path, 'dixon', 'stage_2_data')
     maskpath = os.path.join(build_path, 'totseg', 'stage_1_segment')
-    editpath = os.path.join(build_path, 'totseg', 'stage_3_edit')
+    editpath = os.path.join(build_path, 'totseg', 'stage_4_edit')
     os.makedirs(editpath, exist_ok=True)
 
     if group == 'Controls':

@@ -14,8 +14,8 @@ from radiomics import featureextractor
 
 
 biomarker_units = {
-    "shape_Elongation": "",                 # ratio of axes
-    "shape_Flatness": "",                   # ratio of axes
+    "shape_Elongation": "%",                 # ratio of axes
+    "shape_Flatness": "%",                   # ratio of axes
     "shape_LeastAxisLength": "cm",                       # shortest principal axis
     "shape_MajorAxisLength": "cm",                       # longest principal axis
     "shape_Maximum2DDiameterColumn": "cm",               # max 2D distance in column direction
@@ -24,15 +24,15 @@ biomarker_units = {
     "shape_Maximum3DDiameter": "cm",                     # max 3D distance
     "shape_MeshVolume": "mL",                          # volume of mesh
     "shape_MinorAxisLength": "cm",                       # intermediate principal axis
-    "shape_Sphericity": "",                 # ratio (1 = perfect sphere)
+    "shape_Sphericity": "%",                 # ratio (1 = perfect sphere)
     "shape_SurfaceArea": "cm^2",                         # area of the surface
     "shape_SurfaceVolumeRatio": "cm^-1",                 # SurfaceArea / MeshVolume
     "shape_VoxelVolume": "mL",                         # voxel count × voxel spacing
 }
 
 conversion_factor = {
-    "shape_Elongation": 1,                 # ratio of axes
-    "shape_Flatness": 1,                   # ratio of axes
+    "shape_Elongation": 100,                 # ratio of axes
+    "shape_Flatness": 100,                   # ratio of axes
     "shape_LeastAxisLength": 1/10,                       # shortest principal axis
     "shape_MajorAxisLength": 1/10,                       # longest principal axis
     "shape_Maximum2DDiameterColumn": 1/10,               # max 2D distance in column direction
@@ -41,7 +41,7 @@ conversion_factor = {
     "shape_Maximum3DDiameter": 1/10,                     # max 3D distance
     "shape_MeshVolume": 1/1000,                          # volume of mesh
     "shape_MinorAxisLength": 1/10,                       # intermediate principal axis
-    "shape_Sphericity": 1,                 # ratio (1 = perfect sphere)
+    "shape_Sphericity": 100,                 # ratio (1 = perfect sphere) -> should be the same as compactness
     "shape_SurfaceArea": 1/100,                         # area of the surface
     "shape_SurfaceVolumeRatio": 10,                 # SurfaceArea / MeshVolume
     "shape_VoxelVolume": 1/1000,                         # voxel count × voxel spacing
@@ -157,19 +157,19 @@ def volume_features(vol, roi):
     # Adding a try/except around each line as some of these fail (math error) for masks with limited non-zero values
     data = {}
     try:
-        data[f'{roi}-shape_ski-surface_area'] = [surface_area/100, f'Surface area ({roi})', 'cm^2', 'float']
+        data[f'{roi}-shape_ski-surface_area'] = [surface_area/100, f'{roi} surface area', 'cm^2', 'float']
     except Exception as e:
         logging.error(f"Error computing surface area ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-volume'] = [volume/1000, f'Volume ({roi})', 'mL', 'float']
+        data[f'{roi}-shape_ski-volume'] = [volume/1000, f'{roi} volume', 'mL', 'float']
     except Exception as e:
         logging.error(f"Error computing Volume ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-bounding_box_volume'] = [region_props_3D['area_bbox']*isotropic_voxel_volume/1000, f'Bounding box volume ({roi})', 'mL', 'float']
+        data[f'{roi}-shape_ski-bounding_box_volume'] = [region_props_3D['area_bbox']*isotropic_voxel_volume/1000, f'{roi} bounding box volume', 'mL', 'float']
     except Exception as e:
         logging.error(f"Error computing Bounding box volume ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-convex_hull_volume'] = [region_props_3D['area_convex']*isotropic_voxel_volume/1000, f'Convex hull volume ({roi})', 'mL', 'float']
+        data[f'{roi}-shape_ski-convex_hull_volume'] = [region_props_3D['area_convex']*isotropic_voxel_volume/1000, f'{roi} convex hull volume', 'mL', 'float']
     except Exception as e:
         logging.error(f"Error computing Convex hull volume ({roi}): {e}")
     # try:
@@ -177,55 +177,55 @@ def volume_features(vol, roi):
     # except Exception as e:
     #     logging.error(f"Error computing Volume of holes ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-extent'] = [region_props_3D['extent']*100, f'Extent ({roi})', '%', 'float']    # Percentage of bounding box filled
+        data[f'{roi}-shape_ski-extent'] = [region_props_3D['extent']*100, f'{roi} extent', '%', 'float']    # Percentage of bounding box filled
     except Exception as e:
         logging.error(f"Error computing Extent ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-solidity'] = [region_props_3D['solidity']*100, f'Solidity ({roi})', '%', 'float']   # Percentage of convex hull filled
+        data[f'{roi}-shape_ski-solidity'] = [region_props_3D['solidity']*100, f'{roi} solidity', '%', 'float']   # Percentage of convex hull filled
     except Exception as e:
         logging.error(f"Error computing Solidity ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-compactness'] = [compactness, f'Compactness ({roi})', '%', 'float']
+        data[f'{roi}-shape_ski-compactness'] = [compactness, f'{roi} compactness', '%', 'float']
     except Exception as e:
         logging.error(f"Error computing Compactness ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-long_axis_length'] = [region_props_3D['axis_major_length']*isotropic_spacing/10, f'Long axis length ({roi})', 'cm', 'float']
+        data[f'{roi}-shape_ski-long_axis_length'] = [region_props_3D['axis_major_length']*isotropic_spacing/10, f'{roi} long axis length', 'cm', 'float']
     except Exception as e:
         logging.error(f"Error computing Long axis length ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-short_axis_length'] = [region_props_3D['axis_minor_length']*isotropic_spacing/10, f'Short axis length ({roi})', 'cm', 'float']
+        data[f'{roi}-shape_ski-short_axis_length'] = [region_props_3D['axis_minor_length']*isotropic_spacing/10, f'{roi} short axis length', 'cm', 'float']
     except Exception as e:
         logging.error(f"Error computing Short axis length ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-equivalent_diameter'] = [region_props_3D['equivalent_diameter_area']*isotropic_spacing/10, f'Equivalent diameter ({roi})', 'cm', 'float']
+        data[f'{roi}-shape_ski-equivalent_diameter'] = [region_props_3D['equivalent_diameter_area']*isotropic_spacing/10, f'{roi} equivalent diameter', 'cm', 'float']
     except Exception as e:
         logging.error(f"Error computing Equivalent diameter ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-maximum_depth'] = [max_depth*isotropic_spacing/10, f'Maximum depth ({roi})', 'cm', 'float']
+        data[f'{roi}-shape_ski-maximum_depth'] = [max_depth*isotropic_spacing/10, f'{roi} maximum depth', 'cm', 'float']
     except Exception as e:
         logging.error(f"Error computing Maximum depth ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-primary_moment_of_inertia'] = [region_props_3D['inertia_tensor_eigvals'][0]*isotropic_spacing**2/100, f'Primary moment of inertia ({roi})', 'cm^2', 'float']
+        data[f'{roi}-shape_ski-primary_moment_of_inertia'] = [region_props_3D['inertia_tensor_eigvals'][0]*isotropic_spacing**2/100, f'{roi} primary moment of inertia', 'cm^2', 'float']
     except Exception as e:
         logging.error(f"Error computing Primary moment of inertia ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-second_moment_of_inertia'] = [region_props_3D['inertia_tensor_eigvals'][1]*isotropic_spacing**2/100, f'Second moment of inertia ({roi})', 'cm^2', 'float']
+        data[f'{roi}-shape_ski-second_moment_of_inertia'] = [region_props_3D['inertia_tensor_eigvals'][1]*isotropic_spacing**2/100, f'{roi} second moment of inertia', 'cm^2', 'float']
     except Exception as e:
         logging.error(f"Error computing Second moment of inertia ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-third_moment_of_inertia'] = [region_props_3D['inertia_tensor_eigvals'][2]*isotropic_spacing**2/100, f'Third moment of inertia ({roi})', 'cm^2', 'float']
+        data[f'{roi}-shape_ski-third_moment_of_inertia'] = [region_props_3D['inertia_tensor_eigvals'][2]*isotropic_spacing**2/100, f'{roi} third moment of inertia', 'cm^2', 'float']
     except Exception as e:
         logging.error(f"Error computing Third moment of inertia ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-mean_moment_of_inertia'] = [m*isotropic_spacing**2/100, f'Mean moment of inertia ({roi})', 'cm^2', 'float']
+        data[f'{roi}-shape_ski-mean_moment_of_inertia'] = [m*isotropic_spacing**2/100, f'{roi} mean moment of inertia', 'cm^2', 'float']
     except Exception as e:
         logging.error(f"Error computing Mean moment of inertia ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-fractional_anisotropy_of_inertia'] = [100*FA, f'Fractional anisotropy of inertia ({roi})', '%', 'float']
+        data[f'{roi}-shape_ski-fractional_anisotropy_of_inertia'] = [100*FA, f'{roi} fractional anisotropy of inertia', '%', 'float']
     except Exception as e:
         logging.error(f"Error computing Fractional anisotropy of inertia ({roi}): {e}")
     try:
-        data[f'{roi}-shape_ski-volume_qc'] = [region_props_3D['area']*isotropic_voxel_volume/1000, f'Volume QC ({roi})', 'mL', 'float']
+        data[f'{roi}-shape_ski-volume_qc'] = [region_props_3D['area']*isotropic_voxel_volume/1000, f'{roi} volume QC', 'mL', 'float']
     except Exception as e:
         logging.error(f"Error computing Volume QC ({roi}): {e}")
     # Taking this out for now - computation uses > 32GB of memory for large masks
@@ -271,9 +271,10 @@ def shape_features(roi_vol, roi):
     for p, v in result.items():
         if p[:8]=='original':
             name = roi + '-' + p.replace('original_shape_', 'shape_rad-')
+            desc = f"{roi} {p.replace('original_shape_', '')}"
             unit = biomarker_units[p.replace('original_shape_', 'shape_')]
             v = float(v) * conversion_factor[p.replace('original_shape_', 'shape_')]
-            vals = [v, name, unit, 'float']
+            vals = [v, desc, unit, 'float']
             rval[name] = vals
     return rval
 

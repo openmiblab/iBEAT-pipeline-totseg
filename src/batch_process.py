@@ -5,8 +5,8 @@ import logging
 # import stage_1_segment
 # import stage_2_display
 import stage_3_measure
-# import stage_4_edit
-# import stage_4_archive
+import stage_4_edit
+# import stage_5_archive
 
 
 LOCALPATH = os.path.join(os.getcwd(), 'build')
@@ -33,8 +33,8 @@ def run_totseg():
     # stage_2_display.mosaic(LOCALPATH, group, task='total_mr')
     # stage_2_display.mosaic(LOCALPATH, group, task='tissue_types_mr')
     # stage_2_display.mosaic(LOCALPATH, group, organs=['pancreas', 'liver'], task='total_mr')
-    # stage_4_archive.autosegmentation(LOCALPATH, SHAREDPATH, group)
-    # stage_4_archive.displays(LOCALPATH, SHAREDPATH, group)
+    # stage_5_archive.autosegmentation(LOCALPATH, SHAREDPATH, group)
+    # stage_5_archive.displays(LOCALPATH, SHAREDPATH, group)
     
 
     group = 'Patients'
@@ -51,13 +51,13 @@ def run_totseg():
         # stage_2_display.mosaic(LOCALPATH, group, site, task='tissue_types_mr')
         # stage_2_display.mosaic(LOCALPATH, group, site, organs=['pancreas', 'liver'], task='total_mr')
 
-        stage_3_measure.all_organs(LOCALPATH, group, site)
+        # stage_3_measure.all_organs(LOCALPATH, group, site)
         # stage_3_measure.concatenate(LOCALPATH)
 
-        # stage_4_edit.organ_mask(LOCALPATH, group, site, task='total_mr', organ='pancreas')
+        stage_4_edit.organ_mask(LOCALPATH, group, site, task='total_mr', organ='liver')
         
-        # stage_4_archive.autosegmentation(LOCALPATH, SHAREDPATH, group, site)
-        # stage_4_archive.displays(LOCALPATH, SHAREDPATH, group, site)
+        # stage_5_archive.autosegmentation(LOCALPATH, SHAREDPATH, group, site)
+        # stage_5_archive.displays(LOCALPATH, SHAREDPATH, group, site)
         
         
 
