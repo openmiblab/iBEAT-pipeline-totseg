@@ -11,6 +11,7 @@ import stage_4_edit
 
 LOCALPATH = os.path.join(os.getcwd(), 'build')
 SHAREDPATH = os.path.join("G:\\Shared drives", "iBEAt_Build")
+os.makedirs(LOCALPATH, exist_ok=True)
 
 
 # Set up logging
@@ -52,9 +53,9 @@ def run_totseg():
         # stage_2_display.mosaic(LOCALPATH, group, site, organs=['pancreas', 'liver'], task='total_mr')
 
         # stage_3_measure.all_organs(LOCALPATH, group, site)
-        # stage_3_measure.concatenate(LOCALPATH)
+        stage_3_measure.concatenate(LOCALPATH)
 
-        stage_4_edit.organ_mask(LOCALPATH, group, site, task='total_mr', organ='liver')
+        # stage_4_edit.organ_mask(LOCALPATH, group, site, task='total_mr', organ='liver')
         
         # stage_5_archive.autosegmentation(LOCALPATH, SHAREDPATH, group, site)
         # stage_5_archive.displays(LOCALPATH, SHAREDPATH, group, site)
