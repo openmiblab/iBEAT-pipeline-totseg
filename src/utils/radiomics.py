@@ -10,9 +10,6 @@ import vreg
 from radiomics import featureextractor
 
 
-
-
-
 biomarker_units = {
     "shape_Elongation": "%",                 # ratio of axes
     "shape_Flatness": "%",                   # ratio of axes
@@ -48,7 +45,6 @@ conversion_factor = {
 }
 
 
-
 def interpolate3d_isotropic(array, spacing, isotropic_spacing=None):
 
     if isotropic_spacing is None:
@@ -82,12 +78,7 @@ def interpolate3d_isotropic(array, spacing, isotropic_spacing=None):
     return array, isotropic_spacing
 
 
-
-
 def volume_features(vol, roi):
-
-    # # Crop to mask
-    # vol = vol.crop(margin=10)
 
     arr = vol.values
 
