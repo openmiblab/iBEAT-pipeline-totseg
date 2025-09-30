@@ -58,8 +58,6 @@ def run_totseg():
     # stage_6_archive.edited_segmentation(LOCALPATH, SHAREDPATH, group)
     # stage_6_archive.displays(LOCALPATH, SHAREDPATH, group, site)
         
-        
-
 
 
 if __name__ == '__main__':
