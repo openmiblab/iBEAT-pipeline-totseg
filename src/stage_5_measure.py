@@ -16,8 +16,7 @@ from utils import radiomics
 
 
 def concatenate(build_path):
-
-    output_folder = 'stage_3_measure'
+    output_folder = 'stage_5_measure'
     measurepath = os.path.join(build_path, 'totseg', output_folder)
     for group in ['Controls', 'Patients']:
         folder = os.path.join(measurepath, group) 
@@ -41,14 +40,15 @@ def concatenate(build_path):
         
 
 
-def organs(build_path, group, site=None, task=None, organ=None):
+def edited_organ(build_path, group, site=None, task=None, organ=None):
 
-    input_folder = 'stage_1_segment'
-    output_folder = 'stage_3_measure'
+    input_folder = 'stage_4_edit'
+    output_folder = 'stage_5_measure'
 
     automaskpath = os.path.join(build_path, 'totseg', input_folder)
     measurepath = os.path.join(build_path, 'totseg', output_folder)
     os.makedirs(measurepath, exist_ok=True)
+
     if group == 'Controls':
         siteautomaskpath = os.path.join(automaskpath, "Controls")
         sitemeasurepath = os.path.join(measurepath, "Controls")         
@@ -63,8 +63,8 @@ def organs(build_path, group, site=None, task=None, organ=None):
 
         patient, study, series = automask[1], automask[2][0], automask[3][0]
 
-        # Skip if not the requested task
-        if task != series:
+        # Skip if not the requested organ
+        if series != f"{organ}_edited":
             continue
 
         # If the results already exist, skip
@@ -79,13 +79,7 @@ def organs(build_path, group, site=None, task=None, organ=None):
         dmr = {'data':{}, 'pars':{}}
         
         # Loop over the classes
-        #for idx, roi in tqdm(class_map[series].items(), 'Looping over organs..'):
         for idx, roi in class_map[task].items():
-
-            # Skip if not the requested organ
-            if organ is not None:
-                if organ != roi:
-                    continue
 
             # Binary mask
             mask = (vol.values==idx).astype(np.float32)

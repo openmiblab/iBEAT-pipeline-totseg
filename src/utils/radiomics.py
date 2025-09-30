@@ -7,7 +7,9 @@ import scipy.ndimage as ndi
 from scipy.interpolate import interpn
 import skimage
 import vreg
-from radiomics import featureextractor
+# from radiomics import featureextractor
+
+from utils import numpyradiomics as nprad
 
 
 biomarker_units = {
@@ -224,49 +226,65 @@ def volume_features(vol, roi):
 
     return data
 
+# pyradiomics taken out for now because of installation issues
+# 
+# def shape_features(roi_vol, roi):
 
-def shape_features(roi_vol, roi):
-
-    with tempfile.TemporaryDirectory() as tmp:
-        roi_file = os.path.join(tmp, 'roi.nii.gz')
-        img_file = os.path.join(tmp, 'img.nii.gz') # dummy
-        vreg.write_nifti(roi_vol, roi_file)
-        vreg.write_nifti(roi_vol, img_file)
-        # All features for water
-        extractor = featureextractor.RadiomicsFeatureExtractor()
-        extractor.disableAllFeatures()
-        extractor.enableFeatureClassByName('shape')
-        # Enable only the shape features you care about
-        extractor.enableFeaturesByName(
-            shape = [
-                "Elongation",
-                "Flatness",
-                # "LeastAxisLength", # seems unstable
-                "MajorAxisLength",
-                "Maximum2DDiameterColumn",
-                "Maximum2DDiameterRow",
-                "Maximum2DDiameterSlice",
-                "Maximum3DDiameter",
-                "MeshVolume",
-                "MinorAxisLength",
-                "Sphericity",
-                "SurfaceArea",
-                "SurfaceVolumeRatio",
-                "VoxelVolume",
-            ]
-        )
-        result = extractor.execute(img_file, roi_file)
+#     with tempfile.TemporaryDirectory() as tmp:
+#         roi_file = os.path.join(tmp, 'roi.nii.gz')
+#         img_file = os.path.join(tmp, 'img.nii.gz') # dummy
+#         vreg.write_nifti(roi_vol, roi_file)
+#         vreg.write_nifti(roi_vol, img_file)
+#         # All features for water
+#         extractor = featureextractor.RadiomicsFeatureExtractor()
+#         extractor.disableAllFeatures()
+#         extractor.enableFeatureClassByName('shape')
+#         # Enable only the shape features you care about
+#         extractor.enableFeaturesByName(
+#             shape = [
+#                 "Elongation",
+#                 "Flatness",
+#                 "LeastAxisLength", # seems unstable
+#                 "MajorAxisLength",
+#                 "Maximum2DDiameterColumn",
+#                 "Maximum2DDiameterRow",
+#                 "Maximum2DDiameterSlice",
+#                 "Maximum3DDiameter",
+#                 "MeshVolume",
+#                 "MinorAxisLength",
+#                 "Sphericity",
+#                 "SurfaceArea",
+#                 "SurfaceVolumeRatio",
+#                 "VoxelVolume",
+#             ]
+#         )
+#         result = extractor.execute(img_file, roi_file)
         
-    # Format return value
+#     # Format return value
+#     rval = {}
+#     for p, v in result.items():
+#         if p[:8]=='original':
+#             name = roi + '-' + p.replace('original_shape_', 'shape_rad-')
+#             desc = f"{roi} {p.replace('original_shape_', '')}"
+#             unit = biomarker_units[p.replace('original_shape_', 'shape_')]
+#             v = float(v) * conversion_factor[p.replace('original_shape_', 'shape_')]
+#             vals = [v, desc, unit, 'float']
+#             rval[name] = vals
+#     return rval
+
+
+def shape_features_nprad(roi_vol, roi):
+
+    result = nprad.shape_features_3d(roi_vol.values, roi_vol.spacing)
+
     rval = {}
     for p, v in result.items():
-        if p[:8]=='original':
-            name = roi + '-' + p.replace('original_shape_', 'shape_rad-')
-            desc = f"{roi} {p.replace('original_shape_', '')}"
-            unit = biomarker_units[p.replace('original_shape_', 'shape_')]
-            v = float(v) * conversion_factor[p.replace('original_shape_', 'shape_')]
-            vals = [v, desc, unit, 'float']
-            rval[name] = vals
+        name = roi + '-shape_nprad-' + p
+        desc = f"{roi} {p}"
+        unit = biomarker_units['shape_' + p]
+        v = float(v) * conversion_factor['shape_' + p]
+        vals = [v, desc, unit, 'float']
+        rval[name] = vals
     return rval
 
 

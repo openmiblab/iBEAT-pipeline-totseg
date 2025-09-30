@@ -1,12 +1,11 @@
 tqdm
-numpy<2.0 # pyradiomics has not been ugraded to numpy 2.0
+numpy
 dbdicom
 vreg
 pydmr
 totalsegmentator
 scipy
 scikit-image
-pyradiomics
 matplotlib
 imageio
 moviepy
