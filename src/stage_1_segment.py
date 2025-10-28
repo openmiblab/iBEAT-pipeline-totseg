@@ -1,6 +1,7 @@
 import os
 import logging
 
+from tqdm import tqdm
 import dbdicom as db
 import miblab
 import torch
@@ -31,7 +32,7 @@ def segment(build_path, group, site=None, task='total_mr', batch_size=None):
 
     # Loop over the out-phase series
     count = 0
-    for series_op in series_out_phase:
+    for series_op in tqdm(series_out_phase, desc='Segmenting..'):
 
         # Patient and output study
         patient = series_op[1]
@@ -55,9 +56,9 @@ def segment(build_path, group, site=None, task='total_mr', batch_size=None):
 
         # Read volumes
         if series_wi in db.series(series_op[:3]):
-            vol = db.volume(series_wi)
+            vol = db.volume(series_wi, verbose=0)
         else:
-            vol = db.volume(series_op)
+            vol = db.volume(series_op, verbose=0)
 
         # Perform segmentation
         try:
@@ -68,7 +69,7 @@ def segment(build_path, group, site=None, task='total_mr', batch_size=None):
             continue
 
         # Save results
-        db.write_volume(label_vol, mask_series, ref=series_op)
+        db.write_volume(label_vol, mask_series, ref=series_op, verbose=0)
 
         count += 1 
         if batch_size is not None:
