@@ -1,11 +1,12 @@
 import os
+import logging
 
 import dbdicom as db
 
 
-def dixons(shared_path, local_path, group, site=None):
-    datapath = os.path.join(local_path, 'dixon', 'stage_2_data')
-    archivepath = os.path.join(shared_path, "dixon", "stage_2_data")
+def dixons(archivepath, datapath, group, site=None):
+    datapath = os.path.join(datapath, 'dixon', 'stage_2_data')
+    archivepath = os.path.join(archivepath, 'dixon', 'stage_2_data')
     if group == 'Controls':
         sitedatapath = os.path.join(datapath, 'Controls')
         sitearchivepath = os.path.join(archivepath, 'Controls')
@@ -15,9 +16,7 @@ def dixons(shared_path, local_path, group, site=None):
     db.restore(sitearchivepath, sitedatapath)
 
 
-def segmentations(shared_path, local_path, group, site=None):
-    datapath = os.path.join(local_path, 'totseg', 'stage_1_segment')
-    archivepath = os.path.join(shared_path, 'totseg', 'stage_1_segment')
+def segmentations(archivepath, datapath, group, site=None):
     if group == 'Controls':
         sitedatapath = os.path.join(datapath, 'Controls')
         sitearchivepath = os.path.join(archivepath, 'Controls')
@@ -28,3 +27,17 @@ def segmentations(shared_path, local_path, group, site=None):
 
 
 
+if __name__=='__main__':
+
+    LOCALPATH = r"C:\Users\md1spsx\Documents\Data\iBEAt_Build"
+    SHAREDPATH = r"G:\\Shared drives\iBEAt_Build"
+    os.makedirs(LOCALPATH, exist_ok=True)
+
+    logging.basicConfig(
+        filename=os.path.join(LOCALPATH, 'error.log'),
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+
+    dixons(SHAREDPATH, LOCALPATH, 'Controls')
+    # dixons(SHAREDPATH, LOCALPATH, 'Patients', site='Sheffield')

@@ -7,8 +7,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import imageio.v2 as imageio  # Use v2 interface for compatibility
-from moviepy import VideoFileClip
+# import imageio.v2 as imageio  # Use v2 interface for compatibility
+# from moviepy import VideoFileClip
 
 
 
@@ -29,57 +29,57 @@ def get_distinct_colors(rois, colormap='jet'):
     return colors
 
 
-def movie_overlay(img, rois, file):
+# def movie_overlay(img, rois, file):
 
-    # Define RGBA colors (R, G, B, Alpha) — alpha controls transparency
-    colors = get_distinct_colors(rois, colormap='tab20')
+#     # Define RGBA colors (R, G, B, Alpha) — alpha controls transparency
+#     colors = get_distinct_colors(rois, colormap='tab20')
 
-    # Directory to store temporary frames
-    tmp = os.path.join(os.getcwd(), 'tmp')
-    os.makedirs(tmp, exist_ok=True)
-    filenames = []
+#     # Directory to store temporary frames
+#     tmp = os.path.join(os.getcwd(), 'tmp')
+#     os.makedirs(tmp, exist_ok=True)
+#     filenames = []
 
-    # Generate and save a sequence of plots
-    for i in tqdm(range(img.shape[2]), desc='Building animation..'):
+#     # Generate and save a sequence of plots
+#     for i in tqdm(range(img.shape[2]), desc='Building animation..'):
 
-        # Set up figure
-        fig, ax = plt.subplots(
-            figsize=(5, 5),
-            dpi=300,
-        )
+#         # Set up figure
+#         fig, ax = plt.subplots(
+#             figsize=(5, 5),
+#             dpi=300,
+#         )
 
-        # Display the background image
-        ax.imshow(img[:,:,i].T, cmap='gray', interpolation='none', vmin=0, vmax=np.mean(img) + 2 * np.std(img))
+#         # Display the background image
+#         ax.imshow(img[:,:,i].T, cmap='gray', interpolation='none', vmin=0, vmax=np.mean(img) + 2 * np.std(img))
 
-        # Overlay each mask
-        for mask, color in zip([m.astype(bool) for m in rois.values()], colors):
-            rgba = np.zeros((img.shape[0], img.shape[1], 4), dtype=float)
-            for c in range(4):  # RGBA
-                rgba[..., c] = mask[:,:,i] * color[c]
-            ax.imshow(rgba.transpose((1,0,2)), interpolation='none')
+#         # Overlay each mask
+#         for mask, color in zip([m.astype(bool) for m in rois.values()], colors):
+#             rgba = np.zeros((img.shape[0], img.shape[1], 4), dtype=float)
+#             for c in range(4):  # RGBA
+#                 rgba[..., c] = mask[:,:,i] * color[c]
+#             ax.imshow(rgba.transpose((1,0,2)), interpolation='none')
 
-        # Save eachg image to a tmp file
-        fname = os.path.join(tmp, f'frame_{i}.png')
-        fig.savefig(fname)
-        filenames.append(fname)
-        plt.close(fig)
+#         # Save eachg image to a tmp file
+#         fname = os.path.join(tmp, f'frame_{i}.png')
+#         fig.savefig(fname)
+#         filenames.append(fname)
+#         plt.close(fig)
 
-    # Create GIF
-    print('Creating movie')
-    gif = os.path.join(tmp, 'movie.gif')
-    with imageio.get_writer(gif, mode="I", duration=0.2) as writer:
-        for fname in filenames:
-            image = imageio.imread(fname)
-            writer.append_data(image)
+#     # Create GIF
+#     print('Creating movie')
+#     gif = os.path.join(tmp, 'movie.gif')
+#     with imageio.get_writer(gif, mode="I", duration=0.2) as writer:
+#         for fname in filenames:
+#             image = imageio.imread(fname)
+#             writer.append_data(image)
 
-    # Load gif
-    clip = VideoFileClip(gif)
+#     # Load gif
+#     clip = VideoFileClip(gif)
 
-    # Save as MP4
-    clip.write_videofile(file, codec='libx264')
+#     # Save as MP4
+#     clip.write_videofile(file, codec='libx264')
 
-    # Clean up temporary files
-    shutil.rmtree(tmp)
+#     # Clean up temporary files
+#     shutil.rmtree(tmp)
 
 
 def mosaic_overlay(img, rois, file, colormap='tab20', aspect_ratio=16/9, margin=[15,5,2]):

@@ -10,11 +10,8 @@ from utils import data
 
 
 
-def segment(build_path, group, site=None, task='total_mr', batch_size=None):
+def segment(datapath, maskpath, group, site=None, task='total_mr', patient=None, study=None):
 
-    datapath = os.path.join(build_path, 'dixon', 'stage_2_data') 
-    maskpath = os.path.join(build_path, 'totseg', 'stage_1_segment') 
-    os.makedirs(maskpath, exist_ok=True)
     if site is None:
         sitedatapath = os.path.join(datapath, group)
         sitemaskpath = os.path.join(maskpath, group)
@@ -31,22 +28,29 @@ def segment(build_path, group, site=None, task='total_mr', batch_size=None):
     series_out_phase = [s for s in series if s[3][0][-9:]=='out_phase']
 
     # Loop over the out-phase series
-    count = 0
     for series_op in tqdm(series_out_phase, desc='Segmenting..'):
 
         # Patient and output study
-        patient = series_op[1]
-        study = series_op[2][0]
+        patient_op = series_op[1]
+        study_op = series_op[2][0]
         series_op_desc = series_op[3][0]
         sequence = series_op_desc[:-10]
 
+        # Skip if not the right patient or study
+        if patient is not None:
+            if patient != patient_op:
+                continue
+        if study is not None:
+            if study != study_op:
+                continue
+
         # Skip if it is not the right sequence
-        selected_sequence = data.dixon_series_desc(record, patient, study)
+        selected_sequence = data.dixon_series_desc(record, patient_op, study_op)
         if sequence != selected_sequence:
             continue
 
         # Skip if the masks already exist
-        mask_study = [sitemaskpath, patient, (study,0)]
+        mask_study = [sitemaskpath, patient_op, (study_op,0)]
         mask_series = mask_study + [(f'{task}', 0)]
         if mask_series in db.series(mask_study):
             continue
@@ -65,13 +69,24 @@ def segment(build_path, group, site=None, task='total_mr', batch_size=None):
             device = 'gpu' if torch.cuda.is_available() else 'cpu'
             label_vol = miblab.totseg(vol, cutoff=0.01, task=task, device=device)
         except Exception as e:
-            logging.error(f"Error processing {patient} {sequence} with total segmentator: {e}")
+            logging.error(f"Error processing {patient_op} {sequence} with total segmentator: {e}")
             continue
 
         # Save results
         db.write_volume(label_vol, mask_series, ref=series_op, verbose=0)
+            
 
-        count += 1 
-        if batch_size is not None:
-            if count >= batch_size:
-                return
+if __name__=='__main__':
+
+    DATAPATH = r"C:\Users\md1spsx\Documents\Data\iBEAt_Build\dixon\stage_2_data"
+    BUILDPATH = r"C:\Users\md1spsx\Documents\Data\iBEAt_Build\totseg\stage_1_segment"
+    os.makedirs(BUILDPATH, exist_ok=True)
+
+    logging.basicConfig(
+        filename=os.path.join(BUILDPATH, 'error.log'),
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+
+    segment(DATAPATH, BUILDPATH, 'Controls')
+    # segment(DATAPATH, BUILDPATH, 'Patients', site='Sheffield')

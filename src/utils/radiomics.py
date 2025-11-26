@@ -6,7 +6,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from scipy.interpolate import interpn
 import skimage
-import vreg
+# import vreg
 # from radiomics import featureextractor
 
 from utils import numpyradiomics as nprad
